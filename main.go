@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -128,33 +129,8 @@ func tambahBarang() {
 			break
 		}
 
-		var hargaBeli float64
-		fmt.Print("Harga Beli: ")
-		for {
-			_, err := fmt.Scanln(&hargaBeli)
-			if err != nil {
-				fmt.Println("Input harus angka, coba lagi.")
-				var dummy string
-				fmt.Scanln(&dummy)
-				fmt.Print("Harga Beli: ")
-				continue
-			}
-			break
-		}
-
-		var hargaJual float64
-		fmt.Print("Harga Jual: ")
-		for {
-			_, err := fmt.Scanln(&hargaJual)
-			if err != nil {
-				fmt.Println("Input harus angka, coba lagi.")
-				var dummy string
-				fmt.Scanln(&dummy)
-				fmt.Print("Harga Jual: ")
-				continue
-			}
-			break
-		}
+		hargaBeli := readHarga("Harga Beli")
+		hargaJual := readHarga("Harga Jual")
 
 		_, err := db.Exec(`
 			INSERT INTO AplikasiGudang
@@ -167,6 +143,25 @@ func tambahBarang() {
 		} else {
 			fmt.Println("Barang berhasil disimpan ke database.")
 		}
+	}
+}
+
+func readHarga(label string) float64 {
+	var hargaStr string
+	for {
+		fmt.Printf("%s: ", label)
+		fmt.Scanln(&hargaStr)
+
+		// Ganti koma menjadi titik
+		hargaStr = strings.ReplaceAll(hargaStr, ".", "")
+		hargaStr = strings.ReplaceAll(hargaStr, ",", ".")
+
+		harga, err := strconv.ParseFloat(hargaStr, 64)
+		if err != nil {
+			fmt.Println("Input harus angka, coba lagi.")
+			continue
+		}
+		return harga
 	}
 }
 
@@ -264,6 +259,8 @@ func editBarang() {
 	hargaBeliBaru := hargaBeliLama
 	fmt.Scanln(&inputHargaBeli)
 	if inputHargaBeli != "" {
+		inputHargaBeli = strings.ReplaceAll(inputHargaBeli, ".", "")
+		inputHargaBeli = strings.ReplaceAll(inputHargaBeli, ",", ".")
 		fmt.Sscanf(inputHargaBeli, "%f", &hargaBeliBaru)
 	}
 
@@ -272,6 +269,8 @@ func editBarang() {
 	hargaJualBaru := hargaJualLama
 	fmt.Scanln(&inputHargaJual)
 	if inputHargaJual != "" {
+		inputHargaJual = strings.ReplaceAll(inputHargaJual, ".", "")
+		inputHargaJual = strings.ReplaceAll(inputHargaJual, ",", ".")
 		fmt.Sscanf(inputHargaJual, "%f", &hargaJualBaru)
 	}
 
